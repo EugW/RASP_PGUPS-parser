@@ -10,12 +10,12 @@ import java.io.File
 import java.net.URL
 
 fun main() {
-    //println("Enter course")
-    //val course = readLine()
-    //println("Enter group")
-    val group = "ИВБ-011"//readLine()
-    //URL("https://rasp.pgups.ru/files/xls_files/$course/$group.xlsx").openStream().copyTo(File("schedules", "$group.xlsx").outputStream())
-    val groupParser = GroupParser(group)
+    println("Enter course")
+    val course = readLine()
+    println("Enter group")
+    val group = readLine()
+    URL("https://rasp.pgups.ru/files/xls_files/$course/$group.xlsx").openStream().copyTo(File("schedules", "$group.xlsx").outputStream())
+    val groupParser = GroupParser(group!!)
     groupParser.parseWeek()
 }
 
