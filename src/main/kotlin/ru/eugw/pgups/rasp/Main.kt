@@ -23,22 +23,24 @@ fun main() {
 class GroupParser(private val group: String) {
 
     private val wb = XSSFWorkbook(File("schedules", "$group.xlsx"))
+    private val sheet = wb.getSheetAt(0)
+    private var cellOffset: Int? = null
 
     fun parseWeek() {
         val weekObject = JsonObject()
         val map = mapOf(
-            "2" to Pair(6, 15),
-            "3" to Pair(16, 25),
-            "4" to Pair(26, 35),
-            "5" to Pair(36, 45),
-            "6" to Pair(46, 55),
-            "7" to Pair(56, 57),
-            "2e" to Pair(6, 15),
-            "3e" to Pair(16, 25),
-            "4e" to Pair(26, 35),
-            "5e" to Pair(36, 45),
-            "6e" to Pair(46, 55),
-            "7e" to Pair(56, 57)
+            "2" to Pair(cellOffset() + 1, 15),
+            "3" to Pair(cellOffset() + 11, 25),
+            "4" to Pair(cellOffset() + 21, 35),
+            "5" to Pair(cellOffset() + 31, 45),
+            "6" to Pair(cellOffset() + 41, 55),
+            "7" to Pair(cellOffset() + 51, 57),
+            "2e" to Pair(cellOffset() + 1, 15),
+            "3e" to Pair(cellOffset() + 11, 25),
+            "4e" to Pair(cellOffset() + 21, 35),
+            "5e" to Pair(cellOffset() + 31, 45),
+            "6e" to Pair(cellOffset() + 41, 55),
+            "7e" to Pair(cellOffset() + 51, 57),
         )
         map.forEach {
             weekObject.add(it.key, parseDOW(it.key.length > 1, it.value.first, it.value.second))
@@ -46,6 +48,18 @@ class GroupParser(private val group: String) {
         println("Finished")
         File("parsed_schedules", "$group.json").writeText(GsonBuilder().setPrettyPrinting()
             .create().toJson(weekObject))
+    }
+
+    private fun cellOffset(): Int {
+        if (cellOffset != null)
+            return cellOffset!!
+        sheet.forEachIndexed { indexR, row ->
+            row.forEach { cell ->
+                if (cell.stringCellValue == group)
+                    return indexR
+            }
+        }
+        return 0
     }
 
     private fun getMergedRegion(c: Cell): CellRangeAddress? {
@@ -59,7 +73,6 @@ class GroupParser(private val group: String) {
 
     private fun parseDOW(even: Boolean, start: Int, end: Int): JsonArray {
         val jsonArray = JsonArray()
-        val sheet = wb.getSheetAt(0)
         sheet.forEachIndexed { iRow, row ->
             row.forEachIndexed { iCell, cell ->
                 if (iRow in start..end && iCell == 2) {
@@ -78,7 +91,10 @@ class GroupParser(private val group: String) {
                         else
                             this.toString()
                     }.replace("[", "").replace("]", ""))
-                    val timeString = sheet.getRow(iRow - 1 * iRow % 2)
+                    val timeString = (if (cellOffset() % 2 != 0)
+                            sheet.getRow(iRow - if (iRow % 2 != 0) 1 else 0)
+                                    else
+                            sheet.getRow(iRow - if (iRow % 2 == 0) 1 else 0))
                             .getCell(iCell - 1).stringCellValue
                     val str = StringBuilder(timeString.split("-")[0])
                     val fnh = StringBuilder(timeString.split("-")[1])
@@ -95,8 +111,12 @@ class GroupParser(private val group: String) {
                     jsonLesson.addProperty("time", "$str-$fnh")
                     jsonLesson.addProperty("cabinet", cellString.substringAfter("ауд. "))
                     if (jsonLesson["lesson"].asString.isNotBlank())
-                        if (even && (iRow + 1) % 2 == 0 || !even && (iRow + 1) % 2 != 0) {
-                            jsonArray.add(jsonLesson)
+                        if (cellOffset() % 2 != 0) {
+                            if (even && (iRow + 1) % 2 == 0 || !even && (iRow + 1) % 2 != 0)
+                                jsonArray.add(jsonLesson)
+                        } else {
+                            if (even && (iRow + 1) % 2 != 0 || !even && (iRow + 1) % 2 == 0)
+                                jsonArray.add(jsonLesson)
                         }
                 }
             }
