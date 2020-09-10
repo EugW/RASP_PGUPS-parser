@@ -59,7 +59,6 @@ class GroupParser(private val group: String) {
     private fun parseDOW(even: Boolean, start: Int, end: Int): JsonArray {
         val jsonArray = JsonArray()
         val sheet = wb.getSheetAt(0)
-        println(sheet.getRow(21).getCell(2).stringCellValue)
         sheet.forEachIndexed { iRow, row ->
             row.forEachIndexed { iCell, cell ->
                 if (iRow in start..end && iCell == 2) {
