@@ -8,6 +8,7 @@ import org.apache.poi.ss.util.CellRangeAddress
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import java.io.File
 import java.net.URL
+import kotlin.math.ceil
 
 fun main() {
     println("Enter course")
@@ -77,8 +78,21 @@ class GroupParser(private val group: String) {
                         else
                             this.toString()
                     }.replace("[", "").replace("]", ""))
-                    jsonLesson.addProperty("time", sheet.getRow(iRow - 1 * iRow % 2)
-                        .getCell(iCell - 1).stringCellValue)
+                    val timeString = sheet.getRow(iRow - 1 * iRow % 2)
+                            .getCell(iCell - 1).stringCellValue
+                    val str = StringBuilder(timeString.split("-")[0])
+                    val fnh = StringBuilder(timeString.split("-")[1])
+                    str.insert(str.length - ceil(str.length / 2.0).toInt(), ":")
+                    str.split(":").forEachIndexed { index, s ->
+                        if (s.length < 2)
+                            str.insert(index * 2 + index, "0")
+                    }
+                    fnh.insert(fnh.length - ceil(fnh.length / 2.0).toInt(), ":")
+                    fnh.split(":").forEachIndexed { index, s ->
+                        if (s.length < 2)
+                            fnh.insert(index * 2 + index, "0")
+                    }
+                    jsonLesson.addProperty("time", "$str-$fnh")
                     jsonLesson.addProperty("cabinet", cellString.substringAfter("ауд. "))
                     if (jsonLesson["lesson"].asString.isNotBlank())
                         if (even && (iRow + 1) % 2 == 0 || !even && (iRow + 1) % 2 != 0) {
