@@ -29,25 +29,25 @@ class GroupParser(private val group: String) {
     fun parseWeek() {
         val weekObject = JsonObject()
         val map = mapOf(
-            "2" to Pair(cellOffset() + 1, 15),
-            "3" to Pair(cellOffset() + 11, 25),
-            "4" to Pair(cellOffset() + 21, 35),
-            "5" to Pair(cellOffset() + 31, 45),
-            "6" to Pair(cellOffset() + 41, 55),
-            "7" to Pair(cellOffset() + 51, 57),
-            "2e" to Pair(cellOffset() + 1, 15),
-            "3e" to Pair(cellOffset() + 11, 25),
-            "4e" to Pair(cellOffset() + 21, 35),
-            "5e" to Pair(cellOffset() + 31, 45),
-            "6e" to Pair(cellOffset() + 41, 55),
-            "7e" to Pair(cellOffset() + 51, 57),
+                "2" to Pair(cellOffset() + 1, cellOffset() + 10),
+                "3" to Pair(cellOffset() + 11, cellOffset() + 20),
+                "4" to Pair(cellOffset() + 21, cellOffset() + 30),
+                "5" to Pair(cellOffset() + 31, cellOffset() + 40),
+                "6" to Pair(cellOffset() + 41, cellOffset() + 50),
+                "7" to Pair(cellOffset() + 51, cellOffset() + 52),
+                "2e" to Pair(cellOffset() + 1, cellOffset() + 10),
+                "3e" to Pair(cellOffset() + 11, cellOffset() + 20),
+                "4e" to Pair(cellOffset() + 21, cellOffset() + 30),
+                "5e" to Pair(cellOffset() + 31, cellOffset() + 40),
+                "6e" to Pair(cellOffset() + 41, cellOffset() + 50),
+                "7e" to Pair(cellOffset() + 51, cellOffset() + 52)
         )
         map.forEach {
             weekObject.add(it.key, parseDOW(it.key.length > 1, it.value.first, it.value.second))
         }
         println("Finished")
         File("parsed_schedules", "$group.json").writeText(GsonBuilder().setPrettyPrinting()
-            .create().toJson(weekObject))
+                .create().toJson(weekObject))
     }
 
     private fun cellOffset(): Int {
