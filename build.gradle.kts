@@ -21,6 +21,7 @@ dependencies {
     implementation("org.apache.xmlbeans:xmlbeans:3.1.0")
 
 }
-tasks.withType<KotlinCompile>() {
-    kotlinOptions.jvmTarget = "1.8"
+
+tasks.withType<KotlinCompile> {
+    kotlinOptions.jvmTarget = "14"
 }
